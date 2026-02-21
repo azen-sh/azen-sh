@@ -1,0 +1,20 @@
+{
+  "name": "azen-sh",
+  "private": true,
+  "workspaces": [
+    "server",
+    "core",
+    "packages/*",
+    "packages/integrations/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter ./server dev & bun run --filter ./web dev",
+    "build": "bun run --filter '*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/bun": "latest"
+  }
+}

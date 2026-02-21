@@ -1,0 +1,22 @@
+{
+  "name": "@azen-sh/mcp",
+  "version": "0.1.0",
+  "module": "./index.ts",
+  "type": "module",
+  "bin": {
+    "azen-mcp": "./index.ts"
+  },
+  "scripts": {
+    "dev": "bun run --hot index.ts",
+    "build": "bun build index.ts --outdir dist --target node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@azen-sh/types": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}

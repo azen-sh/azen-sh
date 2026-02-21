@@ -1,0 +1,18 @@
+{
+  "name": "@azen-sh/core",
+  "version": "0.1.0",
+  "module": "./index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build index.ts --outdir dist --target bun",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run db/migrate.ts",
+    "db:studio": "drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}
