@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@azen-sh/core": "workspace:*",
-    "@azen-sh/types": "workspace:*"
+    "@azen-sh/types": "workspace:*",
+    "@hono/zod-validator": "^0.7.6",
+    "hono": "^4.12.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5"
+    "@types/bun": "^1.3.9",
+    "typescript": "^5.9.3"
   }
 }
