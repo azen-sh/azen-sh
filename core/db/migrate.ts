@@ -12,7 +12,7 @@ const db = drizzle(sql)
 export async function runMigrations() {
   console.log("⏳ Running migrations...")
   await migrate(db, { migrationsFolder: "./db/migrations" })
-  console.log("✅ Migrations done")
+  console.log("Migrations done")
   await sql.end()
 }
 

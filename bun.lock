@@ -12,6 +12,7 @@
       "name": "@azen-sh/core",
       "version": "0.1.0",
       "dependencies": {
+        "@azen-sh/types": "workspace:*",
         "@qdrant/js-client-rest": "^1.17.0",
         "bullmq": "^5.70.1",
         "drizzle-orm": "^0.45.1",
