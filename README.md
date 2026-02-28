@@ -2,12 +2,7 @@
 
 <br />
 
-```
-   ___   _______  ____  _  __
-  / _ | /_  / _ \/ __ \/ |/ /
- / __ |  / / ___/ /_/ /    /
-/_/ |_| /___/_/   \____/_/|_/
-```
+<img src="./assets/logo.svg" alt="Azen" width="240" />
 
 ### Memory infrastructure for AI agents
 
