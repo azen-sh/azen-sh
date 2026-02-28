@@ -1,1 +1,5 @@
-console.log("Hello via Bun!");
+export { MemoryService } from "./memories/service"
+export { SearchService } from "./search/service"
+export { db } from "./db/client"
+export { runMigrations } from "./db/migrate"
+export { initGraph } from "./graph/client"
