@@ -1,0 +1,40 @@
+# dependencies
+node_modules
+**/node_modules
+
+# bun
+**/.bun
+
+# build outputs  
+**/dist
+**/.next
+**/.turbo
+
+# env files — never bake into image
+.env
+.env.*
+!.env.example
+
+# dev tools
+**/.cursor
+**/.vscode
+**/CLAUDE.md
+
+# git
+.git
+.gitignore
+
+# docs and examples — not needed in image
+docs
+examples
+web
+
+# test files
+**/*.test.ts
+**/*.spec.ts
+
+# misc
+**/*.md
+!packages/*/README.md
+**/coverage
+**/.DS_Store
