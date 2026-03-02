@@ -1,43 +1,31 @@
 import { Hono } from "hono"
-import { zValidator } from "@hono/zod-validator"
-import { MemoryService } from "@azen-sh/core"
-import { AddMemoryInputSchema, UpdateMemoryInputSchema } from "@azen-sh/types"
+import { cors } from "hono/cors"
+import { logger } from "hono/logger"
+import { runMigrations, initGraph } from "@azen-sh/core"
+import { memoriesRouter } from "./routes/memories"
+import { searchRouter } from "./routes/search"
+import { healthRouter } from "./routes/health"
 
-export const memoriesRouter = new Hono()
+await runMigrations()
+await initGraph()
 
-memoriesRouter.post("/", zValidator("json", AddMemoryInputSchema), async (c) => {
-  const memory = await MemoryService.add(c.req.valid("json"))
-  return c.json(memory, 201)
+const app = new Hono()
+
+app.use("*", cors())
+app.use("*", logger())
+
+app.route("/health", healthRouter)
+app.route("/memories", memoriesRouter)
+app.route("/search", searchRouter)
+
+app.onError((err, c) => {
+  console.error(err)
+  return c.json({ error: err.message }, 500)
 })
 
-memoriesRouter.get("/", async (c) => {
-  const userId = c.req.query("userId")
-  const appId = c.req.query("appId") ?? "default"
-  if (!userId) return c.json({ error: "userId required" }, 400)
-  return c.json(await MemoryService.list(userId, appId))
-})
+export default {
+  port: process.env.PORT ?? 3000,
+  fetch: app.fetch
+}
 
-memoriesRouter.get("/:id", async (c) => {
-  const memory = await MemoryService.get(c.req.param("id"))
-  if (!memory) return c.json({ error: "Not found" }, 404)
-  return c.json(memory)
-})
-
-memoriesRouter.patch("/:id", zValidator("json", UpdateMemoryInputSchema), async (c) => {
-  const memory = await MemoryService.update(c.req.param("id"), c.req.valid("json"))
-  if (!memory) return c.json({ error: "Not found" }, 404)
-  return c.json(memory)
-})
-
-memoriesRouter.delete("/", async (c) => {
-  const userId = c.req.query("userId")
-  const appId = c.req.query("appId") ?? "default"
-  if (!userId) return c.json({ error: "userId required" }, 400)
-  await MemoryService.deleteByUser(userId, appId)
-  return c.json({ success: true })
-})
-
-memoriesRouter.delete("/:id", async (c) => {
-  await MemoryService.delete(c.req.param("id"))
-  return c.json({ success: true })
-})
+console.log(`🚀 Running on http://localhost:${process.env.PORT ?? 3000}`)
