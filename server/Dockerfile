@@ -6,7 +6,7 @@ COPY core/package.json ./core/
 COPY server/package.json ./server/
 COPY packages/types/package.json ./packages/types/
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 FROM oven/bun:1-alpine AS runtime
 WORKDIR /app

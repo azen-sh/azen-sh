@@ -46,7 +46,7 @@
            │                          │
 ┌──────────▼──────────┐   ┌───────────▼────────────────────────┐
 │    Core Engine       │   │         Embedding Providers         │
-│  MemoryService       │   │  Ollama (local) · OpenAI · Custom   │
+│  MemoryService       │   │  OpenAI · Custom (OpenAI-compatible) │
 │  SearchService       │   └────────────────────────────────────┘
 └──┬───────┬───────┬──┘
    │       │       │
@@ -70,7 +70,7 @@ Every memory write fans out to three stores simultaneously:
 |---|---|
 | **Semantic search** | Query memories by meaning, not keywords, using vector embeddings |
 | **Graph-aware** | Traverse relationships between memories up to arbitrary depth with Neo4j |
-| **Multi-provider embeddings** | Ollama (local/private), OpenAI, or any OpenAI-compatible endpoint |
+| **Multi-provider embeddings** | OpenAI, or any OpenAI-compatible endpoint |
 | **Pluggable vector stores** | pgvector (zero extra infra) or Qdrant (high-scale) |
 | **MCP server** | Native Model Context Protocol integration for Claude, Cursor, and any MCP client |
 | **Framework integrations** | Drop-in packages for LangChain and Vercel AI SDK |
@@ -113,14 +113,9 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=password
 
-# Embedding provider: "ollama" | "openai" | "custom"
-EMBEDDING_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=nomic-embed-text
-
-# Or use OpenAI
-# EMBEDDING_PROVIDER=openai
-# OPENAI_API_KEY=sk-...
+# OpenAI embedding
+OPENAI_API_KEY=sk-...
+EMBEDDING_MODEL=text-embedding-3-small
 
 # Vector store: "pgvector" | "qdrant"
 VECTOR_STORE=pgvector
@@ -266,11 +261,10 @@ const store = new AzenMemoryStore({
 
 ## Embedding Providers
 
-| Provider | `EMBEDDING_PROVIDER` | Notes |
-|---|---|---|
-| Ollama | `ollama` | Fully local. Default model: `nomic-embed-text`. |
-| OpenAI | `openai` | Requires `OPENAI_API_KEY`. Uses `text-embedding-3-small`. |
-| Custom | `custom` | Any OpenAI-compatible endpoint via `OPENAI_BASE_URL`. |
+| Provider | Notes |
+|---|---|
+| OpenAI | Requires `OPENAI_API_KEY`. Default model: `text-embedding-3-small`. |
+| Custom | Any OpenAI-compatible endpoint via `EMBEDDING_BASE_URL`. |
 
 <br />
 

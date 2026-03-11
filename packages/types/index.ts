@@ -77,5 +77,5 @@ export interface LLMProvider {
 
 //config types - 
 export type VectorStoreType = "pgvector" | "qdrant" | "pinecone" | "weaviate" | "chroma"
-export type EmbeddingProviderType = "ollama" | "openai" | "custom"
-export type LLMProviderType = "ollama" | "openai" | "custom"
+export type EmbeddingProviderType = "openai" | "custom"
+export type LLMProviderType = "openai" | "custom"

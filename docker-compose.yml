@@ -8,6 +8,8 @@ services:
 
   postgres:
     image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
     shm_size: "128mb"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-azen}
@@ -36,7 +38,7 @@ services:
     restart: unless-stopped
 
   neo4j:
-    image: neo4j:5
+    image: neo4j:5.26.4
     shm_size: "128mb"
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}
@@ -44,6 +46,9 @@ services:
       NEO4J_apoc_export_file_enabled: "true"
       NEO4J_apoc_import_file_enabled: "true"
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    ports:
+      - "7474:7474"
+      - "7687:7687"  
     volumes:
       - neo4jdata:/data
     networks:
@@ -63,23 +68,6 @@ services:
     networks:
       - azen_network
     restart: unless-stopped
-    profiles: ["qdrant"]
-
-  ollama:
-    image: ollama/ollama:latest
-    volumes:
-      - ollamadata:/root/.ollama
-    networks:
-      - azen_network
-    restart: unless-stopped
-    profiles: ["ollama"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
   server:
     build:
@@ -95,8 +83,6 @@ services:
       REDIS_URL: redis://redis:6379
       NEO4J_URL: bolt://neo4j:7687
       QDRANT_URL: http://qdrant:6333
-      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://ollama:11434}
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama:11434}
     networks:
       - azen_network
     depends_on:
@@ -117,4 +103,3 @@ volumes:
   redisdata:
   neo4jdata:
   qdrantdata:
-  ollamadata:
