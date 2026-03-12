@@ -25,7 +25,7 @@
 
 ---
 
-**Azen** is an open-source memory layer you can drop into any AI application. Store, retrieve, and search memories across conversations using vector similarity, graph traversal, and full-text search — all from a single REST API or MCP server.
+**Azen** is an open-source memory layer you can drop into any AI application. Store, retrieve, and search memories across conversations using vector similarity, graph traversal, and full-text search — all from a single REST API.
 
 > Think of it as a long-term memory backend for your agents: persistent, structured, and queryable.
 
@@ -36,7 +36,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        Your Application                      │
-│          SDK / REST API / MCP / LangChain / Vercel AI        │
+│                       REST API                               │
 └───────────────────────────┬─────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────┐
@@ -72,17 +72,69 @@ Every memory write fans out to three stores simultaneously:
 | **Graph-aware** | Traverse relationships between memories up to arbitrary depth with Neo4j |
 | **Multi-provider embeddings** | OpenAI, or any OpenAI-compatible endpoint |
 | **Pluggable vector stores** | pgvector (zero extra infra) or Qdrant (high-scale) |
-| **MCP server** | Native Model Context Protocol integration for Claude, Cursor, and any MCP client |
-| **Framework integrations** | Drop-in packages for LangChain and Vercel AI SDK |
 | **Self-hostable** | Full Docker Compose stack — no cloud dependency |
 | **Per-app namespacing** | Scope memories by `userId` + `appId` for multi-tenant use cases |
 | **TTL support** | Set `expiresAt` on any memory for automatic expiry |
 
 <br />
 
-## Quickstart
+## Self-Hosting
 
-### 1. Clone and install
+### Production (Docker Compose)
+
+The recommended way to run Azen. Builds the server image and starts all services in one command.
+
+**1. Clone the repo**
+
+```bash
+git clone https://github.com/govindvashishat/azen-sh
+cd azen-sh
+```
+
+**2. Configure environment**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in the required values:
+
+```env
+# Required
+POSTGRES_PASSWORD=your_secure_password
+NEO4J_PASSWORD=your_secure_password
+OPENAI_API_KEY=sk-...
+
+# Optional — defaults shown
+POSTGRES_DB=azen
+POSTGRES_USER=postgres
+NEO4J_USER=neo4j
+VECTOR_STORE=pgvector          # pgvector | qdrant
+EMBEDDING_MODEL=text-embedding-3-small
+PORT=3000
+LOG_LEVEL=info
+```
+
+**3. Start everything**
+
+```bash
+docker compose up -d
+```
+
+This builds the server image and starts PostgreSQL (with pgvector), Neo4j, Redis, Qdrant, and the API server. The server waits for PostgreSQL and Neo4j to be healthy before starting.
+
+The API is live at `http://localhost:3000`.
+
+Services also exposed locally:
+- PostgreSQL → `localhost:5432`
+- Neo4j browser → `localhost:7474`
+- Qdrant → `localhost:6333`
+
+---
+
+### Local Development
+
+**1. Clone and install**
 
 ```bash
 git clone https://github.com/govindvashishat/azen-sh
@@ -90,46 +142,30 @@ cd azen-sh
 bun install
 ```
 
-### 2. Start the infrastructure
+**2. Start infrastructure**
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-This brings up PostgreSQL (with pgvector), Neo4j, Qdrant, and Redis.
+This starts PostgreSQL, Neo4j, Qdrant, and Redis locally without building the server image.
 
-### 3. Configure environment
+**3. Configure environment**
 
 ```bash
 cp .env.example .env
 ```
 
-```env
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/azen_dev
+Fill in `POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and `OPENAI_API_KEY` at minimum.
 
-# Neo4j
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=password
-
-# OpenAI embedding
-OPENAI_API_KEY=sk-...
-EMBEDDING_MODEL=text-embedding-3-small
-
-# Vector store: "pgvector" | "qdrant"
-VECTOR_STORE=pgvector
-# QDRANT_URL=http://localhost:6333
-```
-
-### 4. Run migrations and start
+**4. Run migrations and start**
 
 ```bash
 bun run --filter ./core db:migrate
-bun run dev
+bun run --filter ./server dev
 ```
 
-The API is now live at `http://localhost:3000`.
+The API is live at `http://localhost:3000`.
 
 <br />
 
@@ -205,56 +241,10 @@ DELETE /memories/:id
 DELETE /memories?userId=user_123&appId=my-chatbot
 ```
 
-<br />
+### Health check
 
-## Integrations
-
-### MCP Server
-
-Expose Azen as an MCP tool to any compatible client (Claude Desktop, Cursor, etc.):
-
-```bash
-bun run --filter ./packages/mcp start
-```
-
-Add to your MCP client config:
-
-```json
-{
-  "mcpServers": {
-    "azen": {
-      "command": "bun",
-      "args": ["run", "./packages/mcp/index.ts"],
-      "env": { "AZEN_API_URL": "http://localhost:3000" }
-    }
-  }
-}
-```
-
-### Vercel AI SDK
-
-```ts
-import { AzenMemory } from "@azen-sh/vercel-ai"
-
-const memory = new AzenMemory({ baseUrl: "http://localhost:3000" })
-
-// Before generating a response, retrieve relevant context
-const context = await memory.search({
-  userId: "user_123",
-  query: userMessage,
-  topK: 5,
-})
-```
-
-### LangChain
-
-```ts
-import { AzenMemoryStore } from "@azen-sh/langchain"
-
-const store = new AzenMemoryStore({
-  baseUrl: "http://localhost:3000",
-  userId: "user_123",
-})
+```http
+GET /health
 ```
 
 <br />
@@ -290,32 +280,11 @@ azen-sh/
 │   ├── graph/           # Neo4j client + graph operations
 │   └── db/              # Drizzle ORM schema + migrations
 ├── packages/
-│   ├── mcp/             # Model Context Protocol server
-│   ├── types/           # Shared TypeScript types
-│   └── integrations/
-│       ├── vercel-ai/   # Vercel AI SDK integration
-│       └── langchain/   # LangChain integration
+│   └── types/           # Shared TypeScript types
 ├── examples/
 │   ├── nextjs-chatbot/  # Full Next.js chatbot with persistent memory
 │   └── agent-mcp/       # MCP agent example
 └── docker/              # Init scripts for Postgres and Neo4j
-```
-
-<br />
-
-## Self-Hosting
-
-All infrastructure is defined in `docker-compose.dev.yml`. For production, a hardened Compose file and Kubernetes Helm chart are on the roadmap.
-
-```bash
-# Start all services
-docker compose -f docker-compose.dev.yml up -d
-
-# Services exposed:
-#   PostgreSQL  → localhost:5432
-#   Redis       → localhost:6379
-#   Neo4j       → localhost:7474  (browser), localhost:7687 (bolt)
-#   Qdrant      → localhost:6333
 ```
 
 <br />
