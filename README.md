@@ -110,6 +110,7 @@ POSTGRES_DB=azen
 POSTGRES_USER=postgres
 NEO4J_USER=neo4j
 VECTOR_STORE=pgvector          # pgvector | qdrant
+COMPOSE_PROFILES=              # set to match VECTOR_STORE if not pgvector (e.g. qdrant)
 EMBEDDING_MODEL=text-embedding-3-small
 PORT=3000
 LOG_LEVEL=info

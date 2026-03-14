@@ -63,6 +63,8 @@ services:
 
   qdrant:
     image: qdrant/qdrant
+    profiles:
+      - qdrant
     ports:
       - "6333:6333"
     volumes:
