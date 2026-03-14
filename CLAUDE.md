@@ -1,111 +1,162 @@
 ---
-description: Use Bun instead of Node.js, npm, pnpm, or vite.
-globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
+description: Project conventions for azen-sh — a Bun/TypeScript memory infrastructure backend for AI agents.
+globs: "*.ts, *.tsx, *.js, *.jsx, package.json"
 alwaysApply: false
 ---
 
-Default to using Bun instead of Node.js.
+## Project Overview
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Bun automatically loads .env, so don't use dotenv.
+**Azen** is a self-hostable memory infrastructure layer for AI agents. It provides a REST API backed by PostgreSQL (pgvector), Neo4j, Redis, and optionally Qdrant. Every memory write fans out to all three stores simultaneously.
 
-## APIs
+### Monorepo Structure (Bun Workspaces)
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
-
-## Testing
-
-Use `bun test` to run tests.
-
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+```
+server/          → @azen-sh/server   — Hono REST API (main entrypoint)
+core/            → @azen-sh/core     — memory engine, DB, embeddings, vector/graph ops
+packages/types/  → @azen-sh/types    — shared Zod schemas and TypeScript interfaces
+packages/mcp/    → @azen-sh/mcp      — MCP CLI integration
+packages/integrations/ → langchain, vercel-ai adapters (WIP)
 ```
 
-## Frontend
+## Runtime & Tooling
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+Use **Bun** exclusively — not Node.js, npm, pnpm, or yarn.
 
-Server:
+- `bun <file>` instead of `node <file>` or `ts-node <file>`
+- `bun install` instead of `npm install`
+- `bun run <script>` instead of `npm run <script>`
+- `bun test` instead of `jest` or `vitest`
+- `bun build <file.ts>` instead of `webpack` or `esbuild`
+- Bun automatically loads `.env` — do not use `dotenv`
+- Prefer `Bun.file` over `node:fs` readFile/writeFile
+- Use `Bun.$\`cmd\`` instead of `execa`
 
-```ts#index.ts
-import index from "./index.html"
+## Web Framework
 
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
+Use **Hono** — not Express, Fastify, or `Bun.serve()` raw API.
+
+```ts
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import { zValidator } from "@hono/zod-validator"
+
+const router = new Hono()
+
+router.post("/", zValidator("json", MySchema), async (c) => {
+  const input = c.req.valid("json")
+  return c.json(result)
 })
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+- Use `@hono/zod-validator` for input validation on all routes
+- Use `hono/cors` and `hono/logger` middleware at the app level
+- Return errors as `c.json({ error: message }, status)`
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
+## Database & Infrastructure
+
+### PostgreSQL (primary store)
+- Use **Drizzle ORM** — not `pg`, `postgres.js`, `Bun.sql`, or any other client
+- Driver: `postgres` (postgres-js) via Drizzle's `drizzle(postgres(url))` pattern
+- Migrations live in `core/db/migrations/`, generated with `drizzle-kit`
+- Run migrations: `bun run --filter ./core db:migrate`
+- Generate migrations: `bun run --filter ./core db:generate`
+- Browse schema: `bun run --filter ./core db:studio`
+- Schema is in `core/db/schema.ts` — memories table with pgvector embedding column
+
+### Neo4j (graph store)
+- Use **neo4j-driver** — already set up in `core/graph/`
+- All nodes use `MERGE` (not `CREATE`) for idempotency
+- Call `initGraph()` from core on startup to ensure constraints/indices exist
+- Do not bypass `initGraph()` or create constraints manually
+
+### Redis (cache/queue)
+- Use **ioredis** — not `Bun.redis` (project already uses ioredis)
+- Redis is also the backing store for **BullMQ** job queues
+
+### Qdrant (optional vector store)
+- Use `@qdrant/js-client-rest` — already set up in `core/vectors/`
+- Pluggable via `VECTOR_STORE=qdrant` env var; default is `pgvector`
+
+## Validation
+
+Use **Zod 4.x** for all schema definitions. Shared schemas live in `@azen-sh/types` — import from there before defining new ones.
+
+```ts
+import { MemorySchema, AddMemoryInputSchema } from "@azen-sh/types"
 ```
 
-With the following `frontend.tsx`:
+## Architecture Patterns
 
-```tsx#frontend.tsx
-import React from "react";
+### Fan-out writes
+Every memory creation writes to three stores in sequence:
+1. Insert canonical record into PostgreSQL via Drizzle
+2. Generate embedding via OpenAI, upsert to vector store (pgvector or Qdrant)
+3. Create/MERGE node in Neo4j graph
 
-// import .css files directly and it works
-import './index.css';
+Follow this pattern in `MemoryService` — do not skip any store.
 
-import { createRoot } from "react-dom/client";
+### Multi-tenancy
+All memory operations are scoped by `userId` (required) + `appId` (defaults to `"default"`). Always include both in queries and inserts.
 
-const root = createRoot(document.body);
+### Provider abstraction
+- `EmbeddingProvider` interface — currently only OpenAI implementation
+- `VectorStore` interface — pgvector and Qdrant implementations
+- `GraphStore` interface — Neo4j implementation
+- Factory functions in core select implementation based on env vars
 
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
+## Key Environment Variables
 
-root.render(<Frontend />);
+| Variable | Default | Notes |
+|---|---|---|
+| `DATABASE_URL` | — | Required. PostgreSQL connection string |
+| `NEO4J_URL` | — | Required. bolt://... |
+| `NEO4J_USER` | neo4j | |
+| `NEO4J_PASSWORD` | — | Required |
+| `REDIS_URL` | — | Required |
+| `OPENAI_API_KEY` | — | Required for embeddings |
+| `QDRANT_URL` | — | Required only if `VECTOR_STORE=qdrant` |
+| `VECTOR_STORE` | pgvector | `pgvector` or `qdrant` |
+| `EMBEDDING_MODEL` | text-embedding-3-small | |
+| `EMBEDDING_BASE_URL` | — | Custom OpenAI-compatible endpoint |
+| `PORT` | 3000 | |
+
+## Scripts
+
+```bash
+# Development
+bun run dev                            # Start server (hot-reload)
+docker compose -f docker-compose.dev.yml up -d  # Start all infra (dev)
+
+# Database
+bun run --filter ./core db:migrate     # Run pending migrations
+bun run --filter ./core db:generate    # Generate new migration from schema
+bun run --filter ./core db:studio      # Open Drizzle Studio
+
+# Build & checks
+bun run build                          # Build all packages
+bun run typecheck                      # Type-check all packages
+bun test                               # Run all tests
+
+# Production
+docker compose up -d                   # Build image + start all services
 ```
 
-Then, run index.ts
+## Testing
 
-```sh
-bun --hot ./index.ts
+```ts
+import { test, expect } from "bun:test"
+
+test("example", () => {
+  expect(1).toBe(1)
+})
 ```
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+Run with `bun test`. No Jest or Vitest.
+
+## TypeScript
+
+- Strict mode enabled across all packages
+- `verbatimModuleSyntax: true` — use `import type` for type-only imports
+- `noUncheckedIndexedAccess: true` — handle potential undefined on array/object access
+- `moduleResolution: bundler` — Bun-compatible resolution
+- Workspace imports use package names: `import { ... } from "@azen-sh/core"`

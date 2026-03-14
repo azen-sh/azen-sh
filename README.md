@@ -130,43 +130,6 @@ Services also exposed locally:
 - Neo4j browser → `localhost:7474`
 - Qdrant → `localhost:6333`
 
----
-
-### Local Development
-
-**1. Clone and install**
-
-```bash
-git clone https://github.com/govindvashishat/azen-sh
-cd azen-sh
-bun install
-```
-
-**2. Start infrastructure**
-
-```bash
-docker compose -f docker-compose.dev.yml up -d
-```
-
-This starts PostgreSQL, Neo4j, Qdrant, and Redis locally without building the server image.
-
-**3. Configure environment**
-
-```bash
-cp .env.example .env
-```
-
-Fill in `POSTGRES_PASSWORD`, `NEO4J_PASSWORD`, and `OPENAI_API_KEY` at minimum.
-
-**4. Run migrations and start**
-
-```bash
-bun run --filter ./core db:migrate
-bun run --filter ./server dev
-```
-
-The API is live at `http://localhost:3000`.
-
 <br />
 
 ## API Reference
