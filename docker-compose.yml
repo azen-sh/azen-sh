@@ -1,5 +1,8 @@
 name: azen-memory
 
+include:
+  - path: docker/compose/vector-stores.yml
+
 networks:
   azen_network:
     driver: bridge
@@ -61,18 +64,6 @@ services:
       retries: 20
       start_period: 30s
 
-  qdrant:
-    image: qdrant/qdrant
-    profiles:
-      - qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrantdata:/qdrant/storage
-    networks:
-      - azen_network
-    restart: unless-stopped
-
   server:
     build:
       context: .
@@ -106,4 +97,3 @@ volumes:
   pgdata:
   redisdata:
   neo4jdata:
-  qdrantdata:
