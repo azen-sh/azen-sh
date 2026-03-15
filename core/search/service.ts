@@ -8,12 +8,17 @@ import type { SearchInput, SearchResult } from "@azen-sh/types"
 export const SearchService = {
   async semantic(input: SearchInput): Promise<SearchResult[]> {
     const vector = await embeddingProvider.embed(input.query)
-    const hits = await vectorStore.search(vector, input.topK ?? 10)
+    const hits = await vectorStore.search(vector, input.topK ?? 10, {
+      userId: input.userId,
+      appId: input.appId,
+    })
     if (!hits.length) return []
 
     const ids = hits.map(h => h.id)
     const rows = await db.select().from(memories).where(
-      sql`${memories.id} = ANY(ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}])`
+      sql`${memories.id} = ANY(ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}])
+        AND ${memories.userId} = ${input.userId}
+        AND ${memories.appId} = ${input.appId}`
     )
 
     const scoreMap = new Map(hits.map(h => [h.id, h.score]))

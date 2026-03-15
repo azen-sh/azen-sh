@@ -52,9 +52,14 @@ export interface EmbeddingProvider {
     embedBatch(texts: string[]): Promise<number[][]>
 }
 
+export interface VectorSearchFilter {
+    userId: string
+    appId: string
+}
+
 export interface VectorStore {
     upsert(id: string, vector: number[]): Promise<void>
-    search(vector: number[], topK: number): Promise<VectorSearchResult[]>
+    search(vector: number[], topK: number, filter: VectorSearchFilter): Promise<VectorSearchResult[]>
     delete(id: string): Promise<void>
     deleteByUser(userId: string, appId: string): Promise<void>
 }

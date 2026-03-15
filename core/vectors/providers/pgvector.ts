@@ -1,4 +1,4 @@
-import type { VectorSearchResult, VectorStore } from "@azen-sh/types";
+import type { VectorSearchResult, VectorSearchFilter, VectorStore } from "@azen-sh/types";
 import { db } from "../../db/client";
 import { sql } from "drizzle-orm";
 
@@ -11,11 +11,13 @@ export class PgVectorStore implements VectorStore {
     `);
   }
 
-  async search(query: number[], topK: number): Promise<VectorSearchResult[]> {
+  async search(query: number[], topK: number, filter: VectorSearchFilter): Promise<VectorSearchResult[]> {
     const result = await db.execute(sql`
       SELECT id, 1 - (embedding <=> ${JSON.stringify(query)}::vector) as score
       FROM memories
       WHERE embedding IS NOT NULL
+        AND user_id = ${filter.userId}
+        AND app_id = ${filter.appId}
       ORDER BY embedding <=> ${JSON.stringify(query)}::vector
       LIMIT ${topK}
     `);

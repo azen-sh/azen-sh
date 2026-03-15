@@ -1,5 +1,5 @@
 import { QdrantClient } from "@qdrant/js-client-rest"
-import type { VectorStore, VectorSearchResult } from "@azen-sh/types"
+import type { VectorStore, VectorSearchResult, VectorSearchFilter } from "@azen-sh/types"
 
 const COLLECTION = "azen_memories"
 
@@ -29,11 +29,17 @@ export class QdrantVectorStore implements VectorStore {
     })
   }
 
-  async search(query: number[], topK: number): Promise<VectorSearchResult[]> {
+  async search(query: number[], topK: number, filter: VectorSearchFilter): Promise<VectorSearchResult[]> {
     const results = await this.client.search(COLLECTION, {
       vector: query,
       limit: topK,
-      with_payload: false
+      with_payload: false,
+      filter: {
+        must: [
+          { key: "userId", match: { value: filter.userId } },
+          { key: "appId", match: { value: filter.appId } }
+        ]
+      }
     })
     return results.map(r => ({ id: r.id as string, score: r.score }))
   }
