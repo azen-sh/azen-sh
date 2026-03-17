@@ -1,8 +1,6 @@
 import { db } from "../db/client"
 import { memories } from "../db/schema"
-import { embeddingProvider } from "../embed"
-import { vectorStore } from "../vectors"
-import { graphOps } from "../graph/operations"
+import { enqueueSync, enqueueUpdate, enqueueDelete, enqueueDeleteByUser } from "../queue/queue"
 import { eq, and } from "drizzle-orm"
 import type { AddMemoryInput, UpdateMemoryInput, Memory } from "@azen-sh/types"
 
@@ -31,10 +29,8 @@ export const MemoryService = {
 
     if(!row) throw new Error("no row returned");
 
-    const vector = await embeddingProvider.embed(input.content)
-    await vectorStore.upsert(row.id, vector)
     const memory = toMemory(row)
-    await graphOps.addMemory(memory)
+    await enqueueSync(row.id, input.content, memory)
 
     return memory
   },
@@ -64,8 +60,7 @@ export const MemoryService = {
     if (!row) return null
 
     if (input.content) {
-      const vector = await embeddingProvider.embed(input.content)
-      await vectorStore.upsert(row.id, vector)
+      await enqueueUpdate(row.id, input.content)
     }
 
     return toMemory(row)
@@ -73,15 +68,13 @@ export const MemoryService = {
 
   async delete(id: string): Promise<void> {
     await db.delete(memories).where(eq(memories.id, id))
-    await vectorStore.delete(id)
-    await graphOps.deleteMemory(id)
+    await enqueueDelete(id)
   },
 
   async deleteByUser(userId: string, appId = "default"): Promise<void> {
     await db.delete(memories).where(
       and(eq(memories.userId, userId), eq(memories.appId, appId))
     )
-    await vectorStore.deleteByUser(userId, appId)
-    await graphOps.deleteByUser(userId, appId)
+    await enqueueDeleteByUser(userId, appId)
   }
 }

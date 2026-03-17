@@ -21,7 +21,6 @@
     "@qdrant/js-client-rest": "^1.17.0",
     "bullmq": "^5.70.1",
     "drizzle-orm": "^0.45.1",
-    "ioredis": "^5.9.3",
     "neo4j-driver": "^6.0.1",
     "openai": "^6.22.0",
     "postgres": "^3.4.8",
