@@ -3,7 +3,7 @@ import { db } from "../../db/client";
 import { sql } from "drizzle-orm";
 
 export class PgVectorStore implements VectorStore {
-  async upsert(id: string, vector: number[]): Promise<void> {
+  async upsert(id: string, vector: number[], _metadata: { userId: string; appId: string }): Promise<void> {
     await db.execute(sql`
       UPDATE memories
       SET embedding = ${JSON.stringify(vector)}::vector

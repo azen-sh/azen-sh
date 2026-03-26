@@ -22,10 +22,10 @@ export class QdrantVectorStore implements VectorStore {
     }
   }
 
-  async upsert(id: string, vector: number[]): Promise<void> {
+  async upsert(id: string, vector: number[], metadata: { userId: string; appId: string }): Promise<void> {
     await this.ensureCollection(vector.length)
     await this.client.upsert(COLLECTION, {
-      points: [{ id, vector }]
+      points: [{ id, vector, payload: { userId: metadata.userId, appId: metadata.appId } }]
     })
   }
 

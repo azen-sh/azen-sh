@@ -1,13 +1,14 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
-import { runMigrations, initGraph } from "@azen-sh/core"
+import { runMigrations, initGraph, startWorker } from "@azen-sh/core"
 import { memoriesRouter } from "./routes/memories"
 import { searchRouter } from "./routes/search"
 import { healthRouter } from "./routes/health"
 
 await runMigrations()
 await initGraph()
+startWorker()
 
 const app = new Hono()
 

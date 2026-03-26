@@ -60,7 +60,7 @@ export const MemoryService = {
     if (!row) return null
 
     if (input.content) {
-      await enqueueUpdate(row.id, input.content)
+      await enqueueUpdate(row.id, input.content, row.userId, row.appId)
     }
 
     return toMemory(row)

@@ -22,14 +22,14 @@ export function startWorker() {
         case "memory.sync": {
           const { memoryId, content, memory } = job.data
           const vector = await embeddingProvider.embed(content)
-          await vectorStore.upsert(memoryId, vector)
+          await vectorStore.upsert(memoryId, vector, { userId: memory.userId, appId: memory.appId })
           await graphOps.addMemory(deserializeMemory(memory))
           break
         }
         case "memory.update": {
-          const { memoryId, content } = job.data
+          const { memoryId, content, userId, appId } = job.data
           const vector = await embeddingProvider.embed(content)
-          await vectorStore.upsert(memoryId, vector)
+          await vectorStore.upsert(memoryId, vector, { userId, appId })
           break
         }
         case "memory.delete": {

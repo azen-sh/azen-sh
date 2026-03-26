@@ -58,7 +58,7 @@ export interface VectorSearchFilter {
 }
 
 export interface VectorStore {
-    upsert(id: string, vector: number[]): Promise<void>
+    upsert(id: string, vector: number[], metadata: { userId: string; appId: string }): Promise<void>
     search(vector: number[], topK: number, filter: VectorSearchFilter): Promise<VectorSearchResult[]>
     delete(id: string): Promise<void>
     deleteByUser(userId: string, appId: string): Promise<void>

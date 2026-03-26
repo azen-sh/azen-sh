@@ -38,8 +38,8 @@ export function enqueueSync(memoryId: string, content: string, memory: Memory) {
   })
 }
 
-export function enqueueUpdate(memoryId: string, content: string) {
-  return memoryQueue.add("memory.update", { memoryId, content })
+export function enqueueUpdate(memoryId: string, content: string, userId: string, appId: string) {
+  return memoryQueue.add("memory.update", { memoryId, content, userId, appId })
 }
 
 export function enqueueDelete(memoryId: string) {
