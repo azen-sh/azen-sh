@@ -17,7 +17,9 @@ export class OpenAIEmbedding implements EmbeddingProvider {
       model: this.model,
       input: text
     })
-    return res.data[0]!.embedding
+    const first = res.data[0]
+    if (!first) throw new Error("OpenAI returned empty embedding response")
+    return first.embedding
   }
 
   async embedBatch(texts: string[]): Promise<number[][]> {

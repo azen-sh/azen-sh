@@ -1,5 +1,6 @@
 import { Hono } from "hono"
 import { zValidator } from "@hono/zod-validator"
+import { z } from "zod"
 import { MemoryService } from "@azen-sh/core"
 import { AddMemoryInputSchema, UpdateMemoryInputSchema } from "@azen-sh/types"
 
@@ -20,13 +21,17 @@ memoriesRouter.get("/", async (c) => {
 })
 
 memoriesRouter.get("/:id", async (c) => {
-  const memory = await MemoryService.get(c.req.param("id"))
+  const id = c.req.param("id")
+  if (!z.string().uuid().safeParse(id).success) return c.json({ error: "Invalid id format" }, 400)
+  const memory = await MemoryService.get(id)
   if (!memory) return c.json({ error: "Not found" }, 404)
   return c.json(memory)
 })
 
 memoriesRouter.patch("/:id", zValidator("json", UpdateMemoryInputSchema), async (c) => {
-  const memory = await MemoryService.update(c.req.param("id"), c.req.valid("json"))
+  const id = c.req.param("id")
+  if (!z.string().uuid().safeParse(id).success) return c.json({ error: "Invalid id format" }, 400)
+  const memory = await MemoryService.update(id, c.req.valid("json"))
   if (!memory) return c.json({ error: "Not found" }, 404)
   return c.json(memory)
 })
@@ -40,6 +45,8 @@ memoriesRouter.delete("/", async (c) => {
 })
 
 memoriesRouter.delete("/:id", async (c) => {
-  await MemoryService.delete(c.req.param("id"))
+  const id = c.req.param("id")
+  if (!z.string().uuid().safeParse(id).success) return c.json({ error: "Invalid id format" }, 400)
+  await MemoryService.delete(id)
   return c.json({ success: true })
 })
