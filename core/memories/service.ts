@@ -40,10 +40,10 @@ export const MemoryService = {
     return row ? toMemory(row) : null
   },
 
-  async list(userId: string, appId = "default"): Promise<Memory[]> {
+  async list(userId: string, appId = "default", limit = 20, offset = 0): Promise<Memory[]> {
     const rows = await db.select().from(memories).where(
       and(eq(memories.userId, userId), eq(memories.appId, appId))
-    )
+    ).limit(limit).offset(offset)
     return rows.map(toMemory)
   },
 

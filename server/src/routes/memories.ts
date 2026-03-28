@@ -13,8 +13,10 @@ memoriesRouter.post("/", zValidator("json", AddMemoryInputSchema), async (c) => 
 memoriesRouter.get("/", async (c) => {
   const userId = c.req.query("userId")
   const appId = c.req.query("appId") ?? "default"
+  const limit = Math.min(Math.max(parseInt(c.req.query("limit") ?? "20"), 1), 100)
+  const offset = Math.max(parseInt(c.req.query("offset") ?? "0"), 0)
   if (!userId) return c.json({ error: "userId required" }, 400)
-  return c.json(await MemoryService.list(userId, appId))
+  return c.json(await MemoryService.list(userId, appId, limit, offset))
 })
 
 memoriesRouter.get("/:id", async (c) => {
