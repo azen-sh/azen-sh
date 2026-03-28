@@ -3,36 +3,39 @@ import { z } from "zod"
 //Memory - 
 export const MemorySchema = z.object({
   id: z.string().uuid(),
-  userId: z.string(),
-  appId: z.string().default("default"),
-  content: z.string(),
+  userId: z.string().min(1).max(255),
+  appId: z.string().min(1).max(255).default("default"),
+  content: z.string().min(1).max(100_000),
   metadata: z.record(z.string(), z.unknown()).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  expiresAt: z.date().optional(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  expiresAt: z.coerce.date().optional(),
 })
 
 export type Memory = z.infer<typeof MemorySchema>
 
 //Inputs - 
 export const AddMemoryInputSchema = z.object({
-  userId: z.string(),
-  appId: z.string().default("default"),
-  content: z.string().min(1),
+  userId: z.string().min(1).max(255),
+  appId: z.string().min(1).max(255).default("default"),
+  content: z.string().min(1).max(100_000),
   metadata: z.record(z.string(), z.unknown()).optional(),
-  expiresAt: z.date().optional(),
+  expiresAt: z.coerce.date().optional(),
 })
 
 export const UpdateMemoryInputSchema = z.object({
-  content: z.string().min(1).optional(),
+  content: z.string().min(1).max(100_000).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
-})
+}).refine(
+  (data) => data.content !== undefined || data.metadata !== undefined,
+  { message: "At least one of content or metadata is required" }
+)
 
 export const SearchInputSchema = z.object({
-  query: z.string().min(1),
-  userId: z.string(),
-  appId: z.string().default("default"),
-  topK: z.number().default(10),
+  query: z.string().min(1).max(5000),
+  userId: z.string().min(1).max(255),
+  appId: z.string().min(1).max(255).default("default"),
+  topK: z.number().int().min(1).max(100).default(10),
   filter: z.record(z.string(), z.unknown()).optional(),
 })
 
