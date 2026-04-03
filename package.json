@@ -4,6 +4,7 @@
   "workspaces": [
     "server",
     "core",
+    "web",
     "packages/*",
     "packages/integrations/*"
   ],
