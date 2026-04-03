@@ -213,6 +213,43 @@ GET /health
 
 <br />
 
+## MCP Integration
+
+Connect Azen directly to AI tools like Claude Desktop, Cursor, or any MCP-compatible client. The MCP server exposes memory tools over stdio — the AI can store, search, list, and delete memories without you writing any API calls.
+
+**1. Add to your Claude Desktop config** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "azen": {
+      "command": "/path/to/bun",
+      "args": ["run", "/path/to/azen-sh/packages/mcp/index.ts"],
+      "env": {
+        "AZEN_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
+```
+
+> Replace `/path/to/bun` with the output of `which bun`, and update the path to your Azen repo.
+
+**2. Restart Claude Desktop.** The MCP server starts automatically.
+
+**Available tools:**
+
+| Tool | Description |
+|---|---|
+| `add_memory` | Store a new memory |
+| `search_memories` | Semantically search stored memories |
+| `list_memories` | List all memories for a user |
+| `delete_memory` | Delete a memory by ID |
+
+The MCP server requires your Azen API to be running (`docker compose up`).
+
+<br />
+
 ## Embedding Providers
 
 | Provider | Notes |
@@ -244,26 +281,20 @@ azen-sh/
 │   ├── graph/           # Neo4j client + graph operations
 │   └── db/              # Drizzle ORM schema + migrations
 ├── packages/
-│   └── types/           # Shared TypeScript types
-├── examples/
-│   ├── nextjs-chatbot/  # Full Next.js chatbot with persistent memory
-│   └── agent-mcp/       # MCP agent example
-└── docker/              # Init scripts for Postgres and Neo4j
+│   ├── types/           # Shared Zod schemas and TypeScript types
+│   └── mcp/             # MCP server for AI tool integration
+├── tests/               # Schema validation + route handler tests
+├── docker/              # Init scripts for Postgres and Neo4j
+└── .github/workflows/   # CI pipeline (typecheck, test, build)
 ```
 
 <br />
 
 ## Contributing
 
-Contributions are welcome. Please open an issue before submitting a pull request for significant changes.
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup instructions and guidelines.
 
-```bash
-# Run all tests
-bun test
-
-# Type-check all packages
-bun run typecheck
-```
+CI runs on every PR — typecheck, tests, and build must pass before merging.
 
 <br />
 
