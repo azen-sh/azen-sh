@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="./assets/logo.svg" alt="Azen" width="240" />
+<img src="./assets/logo.png" alt="Azen" width="240" />
 
 ### Memory infrastructure for AI agents
 
