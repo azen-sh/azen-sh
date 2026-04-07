@@ -250,6 +250,25 @@ The MCP server requires your Azen API to be running (`docker compose up`).
 
 <br />
 
+## Web Dashboard
+
+A built-in web UI for browsing, searching, and managing memories — no API calls required. Useful for inspecting what your agents have stored, debugging retrieval, and seeding memories by hand.
+
+**Pages:**
+- **Memories** — paginated table with `userId` / `appId` filters, detail view, inline delete
+- **Search** — semantic search with query input and relevance scores
+- **Add Memory** — form to create memories with content and JSON metadata
+
+**Run it locally** (the API server must be running):
+
+```bash
+bun run --filter ./web dev
+```
+
+The dashboard is live at `http://localhost:5173`. See [`web/README.md`](./web/README.md) for details.
+
+<br />
+
 ## Embedding Providers
 
 | Provider | Notes |
@@ -280,6 +299,7 @@ azen-sh/
 │   ├── vectors/         # Vector store abstraction (pgvector, Qdrant)
 │   ├── graph/           # Neo4j client + graph operations
 │   └── db/              # Drizzle ORM schema + migrations
+├── web/                 # React + Vite dashboard for managing memories
 ├── packages/
 │   ├── types/           # Shared Zod schemas and TypeScript types
 │   └── mcp/             # MCP server for AI tool integration
