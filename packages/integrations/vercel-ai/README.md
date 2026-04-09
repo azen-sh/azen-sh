@@ -53,6 +53,11 @@ azenTools({
 |---|---|
 | `addMemory` | Store a new memory (preference, fact, context) for later recall |
 | `searchMemories` | Search stored memories by meaning to recall relevant information |
+| `listMemories` | Browse stored memories with pagination |
+| `getMemory` | Get a specific memory by its ID |
+| `updateMemory` | Update content or metadata of an existing memory |
+| `deleteMemory` | Delete a specific memory (e.g. "forget that") |
+| `deleteAllMemories` | Clear all memories for the user (only when explicitly asked) |
 
 ## How it works
 
