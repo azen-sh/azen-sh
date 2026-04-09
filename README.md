@@ -269,6 +269,33 @@ The dashboard is live at `http://localhost:5173`. See [`web/README.md`](./web/RE
 
 <br />
 
+## Vercel AI SDK Integration
+
+Give your LLM tools to store and search memories with a single function call.
+
+> Not yet published to npm. For now, copy [`packages/integrations/vercel-ai/src/index.ts`](./packages/integrations/vercel-ai/src/index.ts) into your project. It only depends on `ai` and `zod`.
+
+```ts
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
+import { azenTools } from "@azen-sh/vercel-ai"
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  system: "Use your memory tools to remember and recall user preferences.",
+  prompt: "I'm allergic to peanuts.",
+  tools: azenTools({
+    userId: "user_123",
+    apiUrl: "http://localhost:3000",
+  }),
+  maxSteps: 3,
+})
+```
+
+The LLM decides when to store and recall — you just pass the tools. See [`packages/integrations/vercel-ai/README.md`](./packages/integrations/vercel-ai/README.md) for details.
+
+<br />
+
 ## Embedding Providers
 
 | Provider | Notes |
@@ -302,7 +329,9 @@ azen-sh/
 ├── web/                 # React + Vite dashboard for managing memories
 ├── packages/
 │   ├── types/           # Shared Zod schemas and TypeScript types
-│   └── mcp/             # MCP server for AI tool integration
+│   ├── mcp/             # MCP server for AI tool integration
+│   └── integrations/
+│       └── vercel-ai/   # Vercel AI SDK tools (addMemory, searchMemories)
 ├── tests/               # Schema validation + route handler tests
 ├── docker/              # Init scripts for Postgres and Neo4j
 └── .github/workflows/   # CI pipeline (typecheck, test, build)
