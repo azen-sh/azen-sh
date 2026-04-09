@@ -56,5 +56,61 @@ export function azenTools(config: AzenToolsConfig) {
         return results
       },
     }),
+
+    listMemories: tool({
+      description: "List stored memories for the current user. Use this to browse what has been remembered.",
+      parameters: z.object({
+        limit: z.number().min(1).max(100).default(20).describe("Number of memories to return"),
+        offset: z.number().min(0).default(0).describe("Offset for pagination"),
+      }),
+      execute: async ({ limit, offset }) => {
+        const qs = new URLSearchParams({ userId, appId, limit: String(limit), offset: String(offset) })
+        return request(apiUrl, `/memories?${qs.toString()}`)
+      },
+    }),
+
+    getMemory: tool({
+      description: "Get a specific memory by its ID.",
+      parameters: z.object({
+        id: z.string().describe("The memory ID (UUID)"),
+      }),
+      execute: async ({ id }) => {
+        return request(apiUrl, `/memories/${id}`)
+      },
+    }),
+
+    updateMemory: tool({
+      description: "Update an existing memory's content or metadata.",
+      parameters: z.object({
+        id: z.string().describe("The memory ID (UUID) to update"),
+        content: z.string().optional().describe("New content for the memory"),
+        metadata: z.record(z.string(), z.unknown()).optional().describe("New metadata"),
+      }),
+      execute: async ({ id, content, metadata }) => {
+        return request(apiUrl, `/memories/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ content, metadata }),
+        })
+      },
+    }),
+
+    deleteMemory: tool({
+      description: "Delete a specific memory by its ID. Use this when the user asks to forget something.",
+      parameters: z.object({
+        id: z.string().describe("The memory ID (UUID) to delete"),
+      }),
+      execute: async ({ id }) => {
+        return request(apiUrl, `/memories/${id}`, { method: "DELETE" })
+      },
+    }),
+
+    deleteAllMemories: tool({
+      description: "Delete all memories for the current user. Use this only when the user explicitly asks to clear all their memories.",
+      parameters: z.object({}),
+      execute: async () => {
+        const qs = new URLSearchParams({ userId, appId })
+        return request(apiUrl, `/memories?${qs.toString()}`, { method: "DELETE" })
+      },
+    }),
   }
 }
