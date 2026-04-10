@@ -4,10 +4,7 @@ Vercel AI SDK integration for [Azen](https://github.com/azen-sh/azen-sh) — giv
 
 ## Install
 
-> Not yet published to npm. For now, copy `src/index.ts` into your project (e.g. `lib/azen.ts`). It only depends on `ai` and `zod`, which you'll already have if you're using the Vercel AI SDK.
-
 ```bash
-# once published:
 npm install @azen-sh/vercel-ai
 ```
 

@@ -273,7 +273,9 @@ The dashboard is live at `http://localhost:5173`. See [`web/README.md`](./web/RE
 
 Give your LLM tools to store and search memories with a single function call.
 
-> Not yet published to npm. For now, copy [`packages/integrations/vercel-ai/src/index.ts`](./packages/integrations/vercel-ai/src/index.ts) into your project. It only depends on `ai` and `zod`.
+```bash
+npm install @azen-sh/vercel-ai
+```
 
 ```ts
 import { generateText } from "ai"
