@@ -49,11 +49,10 @@ export function azenTools(config: AzenToolsConfig) {
         topK: z.number().min(1).max(50).default(5).describe("Number of results to return"),
       }),
       execute: async ({ query, topK }) => {
-        const results = await request(apiUrl, "/search", {
+        return request(apiUrl, "/search", {
           method: "POST",
           body: JSON.stringify({ query, userId, appId, topK }),
         })
-        return results
       },
     }),
 
