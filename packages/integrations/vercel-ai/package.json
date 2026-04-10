@@ -1,11 +1,25 @@
 {
   "name": "@azen-sh/vercel-ai",
   "version": "0.1.0",
-  "module": "./src/index.ts",
+  "description": "Vercel AI SDK integration for Azen — memory tools for LLMs",
   "type": "module",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
     "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["azen", "vercel-ai", "ai-sdk", "memory", "llm", "agent"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azen-sh/azen-sh",
+    "directory": "packages/integrations/vercel-ai"
   },
   "dependencies": {
     "zod": "^4.3.6"
@@ -14,7 +28,6 @@
     "ai": ">=4.0.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.3.9",
     "ai": "^4.0.0",
     "typescript": "^5.9.3"
   }
