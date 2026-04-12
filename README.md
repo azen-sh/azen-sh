@@ -69,7 +69,7 @@ Every memory write fans out to three stores simultaneously:
 | | |
 |---|---|
 | **Semantic search** | Query memories by meaning, not keywords, using vector embeddings |
-| **Graph-aware** | Traverse relationships between memories up to arbitrary depth with Neo4j |
+| **Graph-enhanced search** | Entities are auto-extracted from memories via LLM and linked in Neo4j. Search expands results through shared entities — so "I love Italian food" and "I'm allergic to peanuts" surface together via shared food/dietary entities |
 | **Multi-provider embeddings** | OpenAI, or any OpenAI-compatible endpoint |
 | **Pluggable vector stores** | pgvector (zero extra infra) or Qdrant (high-scale) |
 | **Self-hostable** | Full Docker Compose stack — no cloud dependency |
@@ -112,6 +112,7 @@ NEO4J_USER=neo4j
 VECTOR_STORE=pgvector          # pgvector | qdrant
 COMPOSE_PROFILES=              # set to match VECTOR_STORE if not pgvector (e.g. qdrant)
 EMBEDDING_MODEL=text-embedding-3-small
+ENTITY_EXTRACTION_MODEL=gpt-4o-mini  # model used to extract entities from memories
 PORT=3000
 LOG_LEVEL=info
 ```
@@ -171,10 +172,18 @@ GET /search?userId=user_123&appId=my-chatbot&query=user+communication+style&topK
 [
   {
     "memory": { "id": "mem_01jk...", "content": "..." },
-    "score": 0.94
+    "score": 0.94,
+    "source": "vector"
+  },
+  {
+    "memory": { "id": "mem_02ab...", "content": "..." },
+    "score": 0.56,
+    "source": "graph"
   }
 ]
 ```
+
+Graph results are memories that share entities with the vector matches (e.g. both mention "italian food"). They're appended with a discounted score and tagged `source: "graph"`. To disable graph expansion, pass `includeGraph=false`.
 
 ### List memories
 
@@ -323,10 +332,12 @@ azen-sh/
 ├── server/              # Hono REST API server
 ├── core/                # Core engine
 │   ├── memories/        # MemoryService — CRUD + fan-out writes
-│   ├── search/          # SearchService — semantic retrieval
+│   ├── search/          # SearchService — semantic + graph-enhanced retrieval
 │   ├── embed/           # Embedding provider abstraction
+│   ├── llm/             # LLM provider for entity extraction
 │   ├── vectors/         # Vector store abstraction (pgvector, Qdrant)
-│   ├── graph/           # Neo4j client + graph operations
+│   ├── graph/           # Neo4j client, graph operations, entity extraction
+│   ├── queue/           # BullMQ worker — async fan-out (embed, vector, graph, entities)
 │   └── db/              # Drizzle ORM schema + migrations
 ├── web/                 # React + Vite dashboard for managing memories
 ├── packages/
@@ -335,7 +346,7 @@ azen-sh/
 │   └── integrations/
 │       └── vercel-ai/   # Vercel AI SDK tools (addMemory, searchMemories)
 ├── tests/               # Schema validation + route handler tests
-├── docker/              # Init scripts for Postgres and Neo4j
+├── docker/              # Docker Compose overrides + Postgres init scripts
 └── .github/workflows/   # CI pipeline (typecheck, test, build)
 ```
 

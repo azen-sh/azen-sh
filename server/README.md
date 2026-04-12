@@ -1,15 +1,34 @@
-# server
+# @azen-sh/server
 
-To install dependencies:
+The REST API server for Azen. Built with [Hono](https://hono.dev/) and deployed via Docker.
+
+## Routes
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/memories` | Create a new memory |
+| `GET` | `/memories` | List memories (filtered by `userId` + `appId`) |
+| `GET` | `/memories/:id` | Get a single memory |
+| `PATCH` | `/memories/:id` | Update a memory |
+| `DELETE` | `/memories/:id` | Delete a memory |
+| `DELETE` | `/memories` | Delete all memories for a user |
+| `GET` | `/search` | Semantic search with optional graph expansion |
+| `GET` | `/health` | Health check |
+
+## Running locally
 
 ```bash
-bun install
+# Start infrastructure (Postgres, Neo4j, Redis)
+docker compose -f docker-compose.dev.yml up -d
+
+# Start the server with hot-reload
+bun run dev
 ```
 
-To run:
+The API is live at `http://localhost:3000`.
+
+## Build
 
 ```bash
-bun run index.ts
+bun run --filter ./server build
 ```
-
-This project was created using `bun init` in bun v1.2.19. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

@@ -1,15 +1,19 @@
-# types
+# @azen-sh/types
 
-To install dependencies:
+Shared Zod schemas and TypeScript types used across all Azen packages.
 
-```bash
-bun install
+## What's in here
+
+- **Schemas** — `MemorySchema`, `AddMemoryInputSchema`, `UpdateMemoryInputSchema`, `SearchInputSchema`
+- **Types** — `Memory`, `SearchResult`, `SearchInput`, `AddMemoryInput`, `UpdateMemoryInput`
+- **Interfaces** — `EmbeddingProvider`, `VectorStore`, `GraphStore`, `LLMProvider`
+- **Config types** — `VectorStoreType`, `EmbeddingProviderType`, `LLMProviderType`
+
+## Usage
+
+```ts
+import { MemorySchema, AddMemoryInputSchema } from "@azen-sh/types"
+import type { Memory, SearchResult, EmbeddingProvider } from "@azen-sh/types"
 ```
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.19. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+All input validation in the server routes and core services uses these schemas. Import from here before defining new ones.
