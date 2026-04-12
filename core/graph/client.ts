@@ -21,6 +21,14 @@ export async function initGraph() {
         CREATE INDEX memory_user_id IF NOT EXISTS
         FOR (m:Memory) ON (m.userId)
       `)
+      await session.run(`
+        CREATE CONSTRAINT entity_unique IF NOT EXISTS
+        FOR (e:Entity) REQUIRE (e.name, e.type, e.userId, e.appId) IS UNIQUE
+      `)
+      await session.run(`
+        CREATE INDEX entity_user_app IF NOT EXISTS
+        FOR (e:Entity) ON (e.userId, e.appId)
+      `)
       console.log("✅ Neo4j ready")
     } finally {
       await session.close()
