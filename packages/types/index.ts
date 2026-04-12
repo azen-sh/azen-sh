@@ -37,6 +37,7 @@ export const SearchInputSchema = z.object({
   appId: z.string().min(1).max(255).default("default"),
   topK: z.number().int().min(1).max(100).default(10),
   filter: z.record(z.string(), z.unknown()).optional(),
+  includeGraph: z.boolean().default(true).optional(),
 })
 
 export type AddMemoryInput = z.infer<typeof AddMemoryInputSchema>
@@ -48,6 +49,7 @@ export type SearchInput = z.infer<typeof SearchInputSchema>
 export type SearchResult = {
     memory: Memory
     score: number
+    source?: "vector" | "graph"
 };
 
 export interface EmbeddingProvider {

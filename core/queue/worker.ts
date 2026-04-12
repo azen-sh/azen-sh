@@ -4,6 +4,7 @@ import type { SerializedMemory } from "./queue"
 import { embeddingProvider } from "../embed"
 import { vectorStore } from "../vectors"
 import { graphOps } from "../graph/operations"
+import { extractEntities } from "../graph/entities"
 
 function deserializeMemory(m: SerializedMemory) {
   return {
@@ -24,12 +25,17 @@ export function startWorker() {
           const vector = await embeddingProvider.embed(content)
           await vectorStore.upsert(memoryId, vector, { userId: memory.userId, appId: memory.appId })
           await graphOps.addMemory(deserializeMemory(memory))
+          const entities = await extractEntities(content)
+          await graphOps.addEntities(memoryId, memory.userId, memory.appId, entities)
           break
         }
         case "memory.update": {
           const { memoryId, content, userId, appId } = job.data
           const vector = await embeddingProvider.embed(content)
           await vectorStore.upsert(memoryId, vector, { userId, appId })
+          await graphOps.clearEntities(memoryId)
+          const entities = await extractEntities(content)
+          await graphOps.addEntities(memoryId, userId, appId, entities)
           break
         }
         case "memory.delete": {
