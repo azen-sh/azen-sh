@@ -37,6 +37,18 @@ export const graphOps = {
     }
   },
 
+  async updateMemoryContent(memoryId: string, content: string) {
+    const session = driver.session()
+    try {
+      await session.run(`
+        MATCH (m:Memory {id: $id})
+        SET m.content = $content
+      `, { id: memoryId, content })
+    } finally {
+      await session.close()
+    }
+  },
+
   async addEntities(
     memoryId: string,
     userId: string,
