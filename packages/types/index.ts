@@ -76,7 +76,11 @@ export interface VectorSearchResult {
 
 export interface GraphStore {
     addMemory(memory: Memory): Promise<void>
+    updateMemoryContent(memoryId: string, content: string): Promise<void>
     getRelated(memoryId: string, depth?: number): Promise<string[]>
+    addEntities(memoryId: string, userId: string, appId: string, entities: { name: string; type: string; relation: string }[]): Promise<void>
+    getRelatedViaEntities(memoryIds: string[], limit?: number): Promise<string[]>
+    clearEntities(memoryId: string): Promise<void>
     deleteMemory(id: string): Promise<void>
     deleteByUser(userId: string, appId: string): Promise<void>
 }
