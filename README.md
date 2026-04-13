@@ -165,7 +165,15 @@ Content-Type: application/json
 ### Semantic search
 
 ```http
-GET /search?userId=user_123&appId=my-chatbot&query=user+communication+style&topK=5
+POST /search
+Content-Type: application/json
+
+{
+  "userId": "user_123",
+  "appId": "my-chatbot",
+  "query": "user communication style",
+  "topK": 5
+}
 ```
 
 ```json
@@ -183,7 +191,7 @@ GET /search?userId=user_123&appId=my-chatbot&query=user+communication+style&topK
 ]
 ```
 
-Graph results are memories that share entities with the vector matches (e.g. both mention "italian food"). They're appended with a discounted score and tagged `source: "graph"`. To disable graph expansion, pass `includeGraph=false`.
+Graph results are memories that share extracted entities with the vector matches. They're appended with a discounted score and tagged `source: "graph"`. To disable graph expansion, pass `"includeGraph": false` in the body.
 
 ### List memories
 

@@ -12,7 +12,7 @@ The REST API server for Azen. Built with [Hono](https://hono.dev/) and deployed 
 | `PATCH` | `/memories/:id` | Update a memory |
 | `DELETE` | `/memories/:id` | Delete a memory |
 | `DELETE` | `/memories` | Delete all memories for a user |
-| `GET` | `/search` | Semantic search with optional graph expansion |
+| `POST` | `/search` | Semantic search with optional graph expansion |
 | `GET` | `/health` | Health check |
 
 ## Running locally
