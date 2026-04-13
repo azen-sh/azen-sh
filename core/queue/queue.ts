@@ -10,7 +10,7 @@ export type SerializedMemory = Omit<Memory, "createdAt" | "updatedAt" | "expires
 
 type JobMap = {
   "memory.sync": { memoryId: string; content: string; memory: SerializedMemory }
-  "memory.update": { memoryId: string; content: string }
+  "memory.update": { memoryId: string; content: string; userId: string; appId: string }
   "memory.delete": { memoryId: string }
   "memory.delete-by-user": { userId: string; appId: string }
 }
