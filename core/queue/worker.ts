@@ -33,6 +33,7 @@ export function startWorker() {
           const { memoryId, content, userId, appId } = job.data
           const vector = await embeddingProvider.embed(content)
           await vectorStore.upsert(memoryId, vector, { userId, appId })
+          await graphOps.updateMemoryContent(memoryId, content)
           await graphOps.clearEntities(memoryId)
           const entities = await extractEntities(content)
           await graphOps.addEntities(memoryId, userId, appId, entities)
