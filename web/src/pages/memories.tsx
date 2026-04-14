@@ -10,7 +10,7 @@ export function MemoriesPage() {
   const [userId, setUserId] = useState("")
   const [appId, setAppId] = useState("")
   const [memories, setMemories] = useState<Memory[]>([])
-  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [offset, setOffset] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,8 +32,8 @@ export function MemoriesPage() {
           limit: PAGE_SIZE,
           offset: newOffset,
         })
-        setMemories(res.memories)
-        setTotal(res.total)
+        setMemories(res)
+        setHasMore(res.length === PAGE_SIZE)
         setOffset(newOffset)
         setHasSearched(true)
       } catch (e) {
@@ -49,14 +49,12 @@ export function MemoriesPage() {
     try {
       await api.memories.delete(id)
       setMemories((prev) => prev.filter((m) => m.id !== id))
-      setTotal((prev) => prev - 1)
       if (selected?.id === id) setSelected(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete")
     }
   }
 
-  const totalPages = Math.ceil(total / PAGE_SIZE)
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1
 
   return (
@@ -151,11 +149,9 @@ export function MemoriesPage() {
                 </table>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {(offset > 0 || hasMore) && (
                   <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                      {total} memories — page {currentPage} of {totalPages}
-                    </span>
+                    <span>Page {currentPage}</span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => fetchMemories(offset - PAGE_SIZE)}
@@ -166,7 +162,7 @@ export function MemoriesPage() {
                       </button>
                       <button
                         onClick={() => fetchMemories(offset + PAGE_SIZE)}
-                        disabled={currentPage >= totalPages}
+                        disabled={!hasMore}
                         className="rounded-md border border-border p-1.5 hover:bg-accent disabled:opacity-30"
                       >
                         <ChevronRight className="h-4 w-4" />
