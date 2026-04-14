@@ -25,11 +25,6 @@ export interface Memory {
   expiresAt: string | null
 }
 
-export interface MemoryListResponse {
-  memories: Memory[]
-  total: number
-}
-
 export interface SearchResult {
   memory: Memory
   score: number
@@ -47,7 +42,7 @@ export const api = {
       if (params.appId) qs.set("appId", params.appId)
       if (params.limit) qs.set("limit", String(params.limit))
       if (params.offset !== undefined) qs.set("offset", String(params.offset))
-      return request<MemoryListResponse>(`/memories?${qs.toString()}`)
+      return request<Memory[]>(`/memories?${qs.toString()}`)
     },
 
     get(id: string) {
